@@ -2,6 +2,7 @@ streamlit>=1.35.0
 requests>=2.31.0
 numpy>=1.24.0
 sentence-transformers>=3.0.0
+torchvision
 faiss-cpu>=1.7.0
 pypdf>=4.0.0
 python-dotenv>=1.0.0
