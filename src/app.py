@@ -150,9 +150,16 @@ def render_sidebar() -> None:
 
         pdf_count, chunk_count, vector_loaded = get_knowledge_base_summary()
         ollama_running = check_ollama_status()
-        is_ready = ollama_running and vector_loaded
-        status_emoji = "🟢" if is_ready else "🔴"
-        status_text = "Ready" if is_ready else "Offline"
+
+        if vector_loaded and ollama_running:
+            status_emoji = "🟢"
+            status_text = "Ready (LLM + RAG)"
+        elif vector_loaded:
+            status_emoji = "🟢"
+            status_text = "Ready (RAG Search)"
+        else:
+            status_emoji = "🔴"
+            status_text = "Offline"
 
         st.markdown("---")
         st.markdown("### Status")
