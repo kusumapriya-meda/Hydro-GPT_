@@ -42,11 +42,11 @@ def build_pdf(path: Path, title: str, sections: list[dict[str, object]]) -> None
 
     story = [Paragraph(title, styles["Title"]), Spacer(1, 12)]
     for index, section in enumerate(sections):
-        heading = section["heading"]
-        paragraphs = section["paragraphs"]
+        heading = str(section["heading"])
+        paragraphs = list(section["paragraphs"])
         story.append(Paragraph(heading, heading_style))
         for paragraph in paragraphs:
-            story.append(Paragraph(paragraph, body_style))
+            story.append(Paragraph(str(paragraph), body_style))
             story.append(Spacer(1, 4))
         if index < len(sections) - 1:
             story.append(PageBreak())
@@ -60,137 +60,204 @@ def main() -> None:
     documents = [
         (
             "Water_Resources.pdf",
-            "Water Resources: Planning, Use, and Sustainability",
+            "Water Resources: Planning, Hydrology, and Sustainability",
             [
                 {
-                    "heading": "Introduction",
+                    "heading": "Hydrological Cycle and Global Water Distribution",
                     "paragraphs": [
-                        "Water resources include rivers, lakes, wetlands, reservoirs, groundwater, and precipitation that replenish the hydrologic system. They support agriculture, domestic supply, industrial production, ecosystem resilience, and public health. Because the same water bodies serve multiple users and functions, planning must balance human demand with ecological protection and climate variability.",
-                        "A strong water resources strategy begins with reliable data collection and transparent governance. Hydrologists, engineers, planners, and communities all contribute to basin-level decisions. These decisions often involve seasonal forecasting, infrastructure upgrades, conservation programs, and participatory water allocation arrangements that are adapted to local conditions.",
+                        "Water resources encompass all natural supplies of water in liquid, solid, or vapor states. Freshwater accounts for only approximately 2.5 percent of the Earth's total water volume, with the remaining 97.5 percent residing in ocean saltwater. Of the total freshwater, over 68 percent is trapped in ice caps and glaciers, approximately 30 percent exists as groundwater, and less than 1 percent is readily accessible in rivers, lakes, reservoirs, and soil moisture.",
+                        "The global hydrological cycle drives the continuous movement of water through evaporation, transpiration, condensation, precipitation, infiltration, and runoff. Human activities such as deforestation, urban development, land conversion, and climate variability significantly alter precipitation patterns, river streamflow regimes, and basin evaporation rates, impacting overall water availability.",
                     ],
                 },
                 {
-                    "heading": "Integrated Management",
+                    "heading": "Integrated Water Resources Management (IWRM)",
                     "paragraphs": [
-                        "Integrated water resources management emphasizes coordinated development and use of land, water, and related resources to maximize economic and social welfare without undermining ecosystem sustainability. This means aligning flood control, irrigation, wastewater treatment, public water supply, and habitat restoration in a shared planning framework.",
-                        "Modern planning tools combine remote sensing, hydrologic modelling, citizen reporting, and geographic information systems. These tools help identify pressure points such as over-allocation, low-flow conditions, saline intrusion, and loss of wetland connectivity. When used well, they allow agencies to evaluate trade-offs and select interventions that improve long-term reliability.",
-                        "The most effective strategies also include demand management. Efficient irrigation, leak detection, water reuse, and pricing reform can reduce waste while preserving service quality. In many regions, non-structural measures such as conservation education and drought preparedness planning yield high benefits at lower cost than building new infrastructure.",
+                        "Integrated Water Resources Management (IWRM) is an internationally accepted operational framework designed to coordinate the development, management, and allocation of land, water, and related ecological resources. The principal objective of IWRM is to maximize economic prosperity and social welfare without compromising the sustainability of vital ecosystems.",
+                        "IWRM incorporates cross-sectoral decision-making across agricultural, industrial, domestic, and environmental water sectors. Key principles include basin-level river planning, economic valuation of water services, stakeholder participation, gender equality in governance, and transparent regulatory mechanisms to handle competing allocation demands during periods of peak scarcity.",
                     ],
                 },
                 {
-                    "heading": "Climate and Resilience",
+                    "heading": "River Basin Hydrology and Reservoir Operations",
                     "paragraphs": [
-                        "A changing climate is increasing the variability of rainfall, snowmelt, and streamflow. Water managers now need to plan for both extreme floods and prolonged droughts. Seasonal forecasting, flexible operating rules, and contingency plans improve resilience when conditions change quickly.",
-                        "Resilient systems are designed around redundancy, diversity, and adaptive management. Storage reservoirs, groundwater recharge projects, wetlands, and distributed treatment systems can all contribute to reliability. By combining multiple options, a region can better absorb shocks while maintaining essential services to farmers, households, and ecosystems.",
+                        "A river basin or watershed represents the fundamental geographic unit for hydrologic analysis and water management. Modern basin management utilizes remote sensing, satellite radar altimetry, GIS mapping, and rainfall-runoff hydraulic modeling to track streamflow, sediment transport, and river channel dynamics.",
+                        "Multipurpose reservoirs provide storage capacity for flood mitigation, hydroelectric power generation, agricultural irrigation, and municipal drinking water supply. Reservoir rule curves dictate seasonal drawdown and filling cycles based on hydrologic forecasts, ensuring multi-year carryover storage while preserving environmental flow requirements for downstream aquatic habitats.",
+                    ],
+                },
+                {
+                    "heading": "Climate Change Adaptation and Water Security",
+                    "paragraphs": [
+                        "Climate change accelerates hydrologic extreme events, shifting seasonal snowpack melt timelines, expanding arid climate zones, and increasing the frequency of heavy precipitation downpours. Water security requires adaptive planning capable of absorbing hydrological shocks without systemic failure.",
+                        "Resilience measures combine structural interventions (such as expanding storage, inter-basin transfers, and flood detention basins) with non-structural strategies (including demand management, water metering, rainwater harvesting, watershed reforestation, and water trading markets).",
                     ],
                 },
             ],
         ),
         (
             "Groundwater_Management.pdf",
-            "Groundwater Management: Protection, Recharge, and Governance",
+            "Groundwater Management: Hydrogeology, Protection, and Governance",
             [
                 {
-                    "heading": "Groundwater as a Strategic Resource",
+                    "heading": "Hydrogeology and Aquifer Dynamics",
                     "paragraphs": [
-                        "Groundwater is one of the most important freshwater reserves on Earth, especially where surface water is seasonal or unreliable. It supports irrigation, municipal supply, industry, and baseflow to rivers and wetlands. Because groundwater moves slowly and accumulates over long periods, it is especially vulnerable to overuse, contamination, and poor governance.",
-                        "Managing groundwater requires understanding aquifer geometry, recharge rates, water quality, and extraction trends. Hydrogeologists use well logs, pumping tests, isotope tracing, and monitoring networks to estimate how much water can be safely used. These datasets are essential for preventing permanent declines in storage and protecting dependent ecosystems.",
+                        "Groundwater represents the primary freshwater storage on Earth, supplying drinking water to over 50 percent of the global human population and over 40 percent of agricultural irrigation. Aquifers are underground layers of water-bearing permeable rock, gravel, sand, or silt. Unconfined aquifers are replenished directly by surface infiltration, while confined aquifers are sandwiched between low-permeability aquitards.",
+                        "Hydrogeological characterization relies on hydraulic conductivity, storativity, transmissivity, well pumping tests, piezometric monitoring networks, and isotopic tracer analysis to calculate safe yield extraction rates and model groundwater flow fields.",
                     ],
                 },
                 {
-                    "heading": "Recharge and Conservation",
+                    "heading": "Over-Exploitation, Subsidence, and Saline Intrusion",
                     "paragraphs": [
-                        "Artificial recharge systems improve the replenishment of aquifers through infiltration basins, recharge trenches, managed aquifer storage, and stormwater capture. These approaches are especially useful in urban areas where impervious surfaces reduce natural infiltration. Recharge projects can also be combined with water harvesting to reduce flood risk and improve drought resilience.",
-                        "Conservation measures are equally important. Drip irrigation, crop selection, and improved irrigation scheduling can greatly reduce pumping demand. In many basins, regulatory frameworks limit new withdrawals during critical periods and require meter installation so that use can be monitored and enforced.",
-                        "Governance also needs to address equity. Groundwater use often crosses property boundaries and administrative jurisdictions, making coordination challenging. Effective management frameworks encourage transparency, basin-level planning, and local participation while preventing unregulated extraction by large users.",
+                        "Unregulated abstraction exceeding natural recharge causes severe water table declines, drying shallow wells, reducing river baseflows, and degrading groundwater-dependent wetlands. Excessive drawdown in coastal areas causes saltwater intrusion, pulling dense ocean saltwater into freshwater aquifers.",
+                        "Land subsidence occurs when prolonged groundwater pumping reduces pore pressure, causing clay and silt beds within aquifers to consolidate irreversibly. Subsidence damages surface buildings, pipelines, roads, and flood protection levees in major agricultural basins and coastal megacities.",
                     ],
                 },
                 {
-                    "heading": "Quality and Risk",
+                    "heading": "Managed Aquifer Recharge (MAR) and Artificial Replenishment",
                     "paragraphs": [
-                        "Groundwater contamination can result from industrial spills, untreated sewage, nitrate leaching, arsenic mobilization, and poor well construction. Once polluted, aquifers are difficult and expensive to remediate. Prevention is therefore more cost-effective than treatment, and monitoring should be designed to detect emerging risks early.",
-                        "Integrated groundwater management also considers land use planning. Protecting recharge zones, restricting hazardous activities near wells, and enforcing septic standards can significantly reduce contamination risk. These measures safeguard both water quality and public health over the long term.",
+                        "Managed Aquifer Recharge (MAR) encompasses engineered techniques designed to intentionally augment groundwater storage. Methods include surface infiltration basins, percolation ponds, aquifer storage and recovery (ASR) injection wells, and check dam structures built across ephemeral streams.",
+                        "MAR projects capture surplus monsoon runoff, treated stormwater, or reclaimed municipal effluent, filtering water naturally through the vadose zone into underlying aquifers. MAR improves drought resilience, prevents seawater intrusion, and restores depleted groundwater storage.",
+                    ],
+                },
+                {
+                    "heading": "Groundwater Quality Protection and Contaminant Mitigation",
+                    "paragraphs": [
+                        "Groundwater contamination arises from point sources (leaking underground fuel tanks, industrial solvent spills, landfill leachate) and non-point sources (nitrate fertilizer leaching, pesticide runoff, municipal septic systems). Geogenic contaminants like geogenic arsenic and fluoride pose severe widespread health risks.",
+                        "Protection strategies enforce wellhead protection zones (WHPZs), restrict chemical storage near recharge areas, mandate impermeable liners for landfills, and implement permeable reactive barriers (PRBs) or pump-and-treat remediation systems for contaminated plumes.",
                     ],
                 },
             ],
         ),
         (
             "Water_Quality.pdf",
-            "Water Quality: Monitoring, Treatment, and Protection",
+            "Water Quality: Standards, Contaminants, and Treatment Technologies",
             [
                 {
-                    "heading": "Why Water Quality Matters",
+                    "heading": "Why Water Quality Matters and Regulatory Standards",
                     "paragraphs": [
-                        "Water quality determines whether water is safe for drinking, agricultural use, industrial production, recreation, and ecosystem support. Even water that is plentiful can become unusable if it contains excessive nutrients, pathogens, chemicals, sediments, or harmful temperatures. Protecting water quality is therefore as important as maintaining water quantity.",
-                        "Monitoring programs track physical, chemical, and biological indicators such as turbidity, pH, dissolved oxygen, conductivity, pathogens, heavy metals, and nutrient concentrations. By comparing measurements over time and across locations, agencies can identify pollution sources and respond before risks expand.",
+                        "Water quality defines the chemical, physical, and biological characteristics of water relative to its designated use. World Health Organization (WHO) Guidelines and national Environmental Protection Agency (EPA) regulations specify Maximum Contaminant Levels (MCLs) for physical parameters (pH, turbidity, total dissolved solids), chemical pollutants (nitrates, heavy metals, synthetic organics), and biological pathogens.",
+                        "Water quality monitoring networks utilize continuous automated sensors, turbidity meters, pH probes, electrical conductivity (EC) sensors, dissolved oxygen (DO) meters, and gas chromatography-mass spectrometry (GC-MS) laboratory analysis to detect contamination early.",
                     ],
                 },
                 {
-                    "heading": "Sources of Pollution",
+                    "heading": "Sources of Pollution: Point and Non-Point Source Pollution",
                     "paragraphs": [
-                        "Pollution enters water bodies through point sources such as wastewater discharge pipes and industrial outfalls, and through diffuse sources such as agricultural runoff, urban stormwater, and erosion. Nutrient pollution can cause algal blooms, depletion of oxygen, and fish kills. Sediment runoff can reduce visibility, damage habitats, and interfere with drinking water treatment.",
-                        "Emerging contaminants, including pharmaceuticals, personal care products, and microplastics, are also changing the way regulators approach monitoring. These substances often appear in low concentrations but may have long-term ecological and human health effects. Their detection requires advanced analytical methods and careful interpretation.",
+                        "Point source pollution originates from identifiable single locations, such as municipal wastewater treatment plant outfalls, factory effluent pipes, and industrial facilities. Point sources are regulated via discharge permits and effluent limitations.",
+                        "Non-point source (diffuse) pollution occurs when rainfall runoff washes land contaminants into waterways. Key non-point sources include agricultural fertilizers (nitrogen and phosphorus causing severe eutrophication and toxic microcystin algal blooms), urban stormwater runoff carrying heavy metals and microplastics, and sediment erosion.",
                     ],
                 },
                 {
-                    "heading": "Treatment and Protection",
+                    "heading": "Chemical Contaminants: Heavy Metals, Nitrates, and PFAS",
                     "paragraphs": [
-                        "Water treatment systems vary by use case. Drinking water systems often rely on coagulation, filtration, disinfection, and pH adjustment, while wastewater plants use biological treatment, clarification, and nutrient removal processes. Green infrastructure such as constructed wetlands and vegetated swales can complement engineered treatment systems by capturing runoff before it reaches rivers or lakes.",
-                        "Effective water quality management requires coordination across sectors. Farmers, utilities, industries, construction firms, and local governments all shape the quality of the receiving water. Strong regulations, public education, and incentives for pollution prevention can reduce the burden on treatment systems and improve environmental outcomes.",
+                        "Heavy metals such as lead, cadmium, mercury, and hexavalent chromium enter water through mining, industrial discharge, and corroding lead plumbing pipes. Chronic exposure leads to severe neurological damage, kidney failure, and developmental disorders.",
+                        "Per- and polyfluoroalkyl substances (PFAS), known as 'forever chemicals', are persistent industrial compounds that accumulate in water systems and human blood. Nitrate contamination from intensive agriculture causes methemoglobinemia (blue baby syndrome) and requires advanced ion exchange or reverse osmosis treatment.",
+                    ],
+                },
+                {
+                    "heading": "Water and Wastewater Treatment Processes",
+                    "paragraphs": [
+                        "Conventional drinking water treatment follows a multi-stage process: coagulation/flocculation (adding alum to bind suspended solids), sedimentation (settling flocs), sand filtration, and chemical disinfection (chlorination, ozonation, or ultraviolet UV irradiation).",
+                        "Wastewater treatment plants utilize primary physical settling, secondary biological activated sludge aeration tanks to decompose organic matter, tertiary nutrient removal (denitrification and phosphorus precipitation), and membrane bioreactors (MBR) or reverse osmosis (RO) for indirect potable reuse.",
                     ],
                 },
             ],
         ),
         (
             "Flood_Control.pdf",
-            "Flood Control: Infrastructure, Planning, and Community Safety",
+            "Flood Control: Risk Assessment, Infrastructure, and Resilience",
             [
                 {
-                    "heading": "Flood Risk and Exposure",
+                    "heading": "Flood Risk, Drivers, and Exposure",
                     "paragraphs": [
-                        "Floods are among the most damaging natural hazards because they can destroy homes, disrupt transport, contaminate water supplies, and interrupt economic activity. Flood risk arises from intense rainfall, river overflow, coastal storm surge, rapid snowmelt, and land use changes that reduce infiltration. The consequences are often magnified when settlements grow in flood-prone areas.",
-                        "A modern flood management approach combines structural and non-structural measures. Structural options include levees, detention basins, floodwalls, channel improvements, and elevated roads. Non-structural options include zoning, floodplain mapping, early warning systems, insurance policies, and emergency preparedness.",
+                        "Floods occur when water inundates normally dry land, driven by prolonged heavy rainfall, flash downpours, river overflows, storm surges, rapid snowmelt, or structural dam breaches. Flood risk is determined by hazard frequency, hydrologic exposure, and socioeconomic vulnerability.",
+                        "Unplanned urban growth in low-lying floodplains drastically increases flood exposure. Impervious urban surfaces (concrete, asphalt) impair natural infiltration, dramatically accelerating peak stormwater discharge and increasing urban flash flooding.",
                     ],
                 },
                 {
-                    "heading": "Designing Resilient Systems",
+                    "heading": "Structural Flood Mitigation Engineering",
                     "paragraphs": [
-                        "Resilient flood systems are designed to withstand events beyond historical averages. This often means planning for extreme precipitation, sea level rise, and infrastructure failure. Climate adaptation strategies can include wetland restoration, green roofs, permeable pavements, and managed storage that slows runoff before it reaches rivers.",
-                        "Good flood control planning also considers community behavior. Evacuation routes, public communication, and household preparedness all influence whether a hazard becomes a disaster. When communities understand their risk and know how to respond, damage can be reduced even when water levels exceed expectations.",
+                        "Structural engineering defenses modify flood pathways to protect high-density populations and critical infrastructure. Primary structural interventions include levees, floodwalls, river channel widening/dredging, flood diversion canals, and upstream detention reservoirs.",
+                        "Coastal flood engineering employs seawalls, storm surge barriers, breakwaters, elevated coastal dikes, and large-scale pumping stations capable of removing thousands of cubic meters of floodwater per minute during extreme storm events.",
                     ],
                 },
                 {
-                    "heading": "Integrated Flood Management",
+                    "heading": "Non-Structural Flood Management and Early Warning Systems",
                     "paragraphs": [
-                        "Integrated flood management focuses on protecting people, property, and ecosystems at the basin scale. It recognizes that upstream land use affects downstream flow, and that floodplains can provide valuable storage and habitat if managed carefully. Restoring wetlands and reconnecting rivers to floodplains can reduce peak flows while improving biodiversity.",
-                        "The most successful programs combine engineering with local knowledge and long-term maintenance. Levees require inspections, pumping stations need upkeep, and warning systems require regular testing. By investing in maintenance and community engagement, agencies can ensure that flood control infrastructure remains effective for decades.",
+                        "Non-structural strategies reduce vulnerability without altering physical waterways. Key measures include floodplain land-use zoning regulations, building codes requiring elevated foundations, flood risk insurance schemes, and wetland conservation.",
+                        "Early Warning Systems (EWS) integrate weather radar, river gauge telemetering, hydrologic runoff forecasts, and real-time mobile cell-broadcast emergency notifications to allow timely evacuation of vulnerable populations prior to peak river crests.",
+                    ],
+                },
+                {
+                    "heading": "Nature-Based Solutions and Urban Sponge Cities",
+                    "paragraphs": [
+                        "Nature-based solutions (NbS) restore natural ecosystem hydrology to mitigate flood energy. Methods include restoring river meanders, reconnecting floodplain wetlands, and establishing coastal mangrove belts to attenuate wave energy.",
+                        "The Sponge City concept transforms urban landscapes by integrating permeable pavements, bioswales, rain gardens, green roofs, and urban retention ponds to capture, slow, and filter up to 80 percent of stormwater runoff locally.",
                     ],
                 },
             ],
         ),
         (
             "Drought_Management.pdf",
-            "Drought Management: Preparedness, Response, and Recovery",
+            "Drought Management: Monitoring, Mitigation, and Resilience",
             [
                 {
-                    "heading": "Understanding Drought",
+                    "heading": "Understanding Drought Categories and Indices",
                     "paragraphs": [
-                        "Drought is a slow-onset hazard that can persist for months or years, causing water shortages, crop failure, ecosystem stress, and economic losses. Unlike floods, droughts are often difficult to recognize early because their impacts accumulate gradually. Effective monitoring relies on precipitation records, soil moisture estimates, reservoir storage, groundwater levels, and vegetation indicators.",
-                        "Because drought affects different sectors in different ways, management strategies must be flexible. Agriculture may need irrigation restrictions and crop switching, while municipalities may focus on conservation targets and emergency supply arrangements. A well-designed drought plan can reduce the severity of impacts by promoting early action rather than reactive emergency measures.",
+                        "Drought is a prolonged, insidious moisture deficit that propagates through the hydrological cycle. It is categorized into four main phases: Meteorological Drought (precipitation deficit), Agricultural Drought (soil moisture deficit impairing crop yields), Hydrological Drought (declining streamflow, lake levels, and groundwater tables), and Socioeconomic Drought (water supply shortages disrupting economic goods and services).",
+                        "Drought monitoring relies on key indices including the Standardized Precipitation Index (SPI), Standardized Precipitation Evapotranspiration Index (SPEI), Palmer Drought Severity Index (PDSI), and satellite-derived Normalized Difference Vegetation Index (NDVI).",
                     ],
                 },
                 {
-                    "heading": "Preparedness and Response",
+                    "heading": "Drought Preparedness and Municipal Contingency Planning",
                     "paragraphs": [
-                        "Preparedness measures include water conservation campaigns, drought contingency plans, water banking, and reserve storage. Communities can also reduce risk through demand management, leakage control, and use of alternative sources such as recycled water. These measures become more effective when triggers are clear and communications are timely.",
-                        "During drought conditions, agencies often implement staged restrictions, prioritize critical uses, and coordinate with utilities, farmers, and businesses. Transparency is essential because public trust is stronger when people understand the reasons behind restrictions and the expected duration of shortages. Recovery planning should begin before the drought ends so that communities can restore systems quickly and avoid future vulnerability.",
+                        "Proactive drought management replaces reactive crisis response with multi-staged drought contingency plans. Municipal plans define operational trigger levels based on reservoir storage thresholds, initiating staged conservation targets (Stage 1 voluntary conservation, Stage 2 mandatory outdoor watering bans, Stage 3 emergency rationing).",
+                        "Municipal resilience is enhanced through water loss reduction (detecting network pipe leaks), dual-pipe graywater recycling networks, brackish water desalination, and inter-utility emergency interconnections.",
                     ],
                 },
                 {
-                    "heading": "Building Long-Term Resilience",
+                    "heading": "Agricultural Resilience, Micro-Irrigation, and Crop Adaptation",
                     "paragraphs": [
-                        "Long-term drought resilience depends on both infrastructure and governance. Investments in storage, recharge, water reuse, efficient irrigation, and ecosystem restoration can reduce the impact of dry periods. At the same time, institutions need clear legal frameworks, robust data systems, and regular updates to drought plans.",
-                        "The most sustainable strategies recognize that drought is not only a hydrologic event but also a social and economic challenge. By combining technical planning, community participation, and transparent decision-making, water managers can protect livelihoods and ecosystems even under increasing climatic stress.",
+                        "Agriculture accounts for over 70 percent of global freshwater consumption. Enhancing agricultural drought resilience requires transitioning from flood/furrow irrigation to precision micro-irrigation systems such as drip lines and micro-sprinklers.",
+                        "Soil moisture conservation techniques—including conservation tillage, cover cropping, and mulching—reduce evaporative water loss. Agronomic adaptation incorporates drought-tolerant crop varieties, deficit irrigation scheduling, and crop rotation strategies tailored to reduced water allocations.",
+                    ],
+                },
+                {
+                    "heading": "Long-Term Aridity Adaptation and Water Reuse Technologies",
+                    "paragraphs": [
+                        "Arid regions adapt through large-scale water reuse and advanced desalination. Seawater Reverse Osmosis (SWRO) removes dissolved salts using high-pressure semi-permeable membranes, providing drought-proof drinking water supplies for arid coastal regions.",
+                        "Direct and Indirect Potable Reuse (DPR/IPR) purify municipal wastewater through advanced oxidation, microfiltration, and reverse osmosis, returning high-purity water to reservoirs or aquifers, establishing a closed-loop sustainable water cycle.",
+                    ],
+                },
+            ],
+        ),
+        (
+            "Water_Policy_and_Governance.pdf",
+            "Water Policy, Laws, and Global Resource Governance",
+            [
+                {
+                    "heading": "UN Sustainable Development Goal 6 (SDG 6) and Human Rights",
+                    "paragraphs": [
+                        "United Nations Sustainable Development Goal 6 (SDG 6) commits the global community to ensuring access to safe water and sanitation for all by 2030. SDG 6 targets encompass universal drinking water access, adequate sanitation, improved ambient water quality, increased water-use efficiency, integrated water management, and water ecosystem protection.",
+                        "In 2010, the UN General Assembly explicitly recognized access to clean, safe, acceptable, and affordable drinking water and sanitation as a fundamental human right essential for the full enjoyment of life and human dignity.",
+                    ],
+                },
+                {
+                    "heading": "Transboundary Water Treaties and International Water Law",
+                    "paragraphs": [
+                        "Over 260 international river basins cross political boundaries, serving 40 percent of the world's population. Transboundary water governance requires international legal treaties and river basin commissions to prevent hydropolitical conflict.",
+                        "International water law principles—codified in the 1997 UN Watercourses Convention—rely on two foundational pillars: Equitable and Reasonable Utilization of shared waters, and the Obligation Not to Cause Significant Harm to downstream riparian states.",
+                    ],
+                },
+                {
+                    "heading": "Economic Instruments: Water Pricing, Water Rights, and Subsidies",
+                    "paragraphs": [
+                        "Economic instruments incentivize water conservation while funding utility infrastructure maintenance. Block-rate tariffs charge higher volumetric rates for high-volume consumption, protecting basic lifeline water affordability for low-income households while discouraging wasteful use.",
+                        "Tradable water rights allocation markets allow agricultural and industrial water users to trade volumetric water entitlements, encouraging water-efficient technology adoption and transferring water to high-value uses during extreme scarcity.",
+                    ],
+                },
+                {
+                    "heading": "Community-Based Watershed Management and Water Governance",
+                    "paragraphs": [
+                        "Effective water governance requires decentralization and direct community participation. Water User Associations (WUAs) empower local farming communities to manage canal distribution, maintain infrastructure, and resolve local allocation disputes equity.",
+                        "Integrating traditional ecological knowledge—such as ancient qanat underground channels, stepwells, and traditional rainwater harvesting bunds—with modern hydrologic science yields culturally robust, climate-resilient water stewardship.",
                     ],
                 },
             ],
