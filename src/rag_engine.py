@@ -251,14 +251,14 @@ class RAGEngine:
         except Exception:
             pass
 
-        # 2. Standalone RAG mode: format single top matching document section cleanly
+        # 2. Standalone RAG mode: format single top matching document section cleanly with sub-topic title
         formatted_sections = []
         known_headings = [
-            "Why Water Quality Matters", "Sources of Pollution", "Treatment and Protection",
-            "Introduction", "Integrated Management", "Climate and Resilience",
+            "Sources of Pollution", "Why Water Quality Matters", "Treatment and Protection",
             "Groundwater as a Strategic Resource", "Recharge and Conservation", "Quality and Risk",
             "Flood Risk and Exposure", "Designing Resilient Systems", "Integrated Flood Management",
-            "Understanding Drought", "Preparedness and Response", "Building Long-Term Resilience"
+            "Understanding Drought", "Preparedness and Response", "Building Long-Term Resilience",
+            "Introduction", "Integrated Management", "Climate and Resilience"
         ]
 
         seen_titles = set()
@@ -269,11 +269,19 @@ class RAGEngine:
                 continue
             seen_titles.add(title)
 
+            subtopic = ""
             for head in known_headings:
-                if head in content and f"**{head}**" not in content:
-                    content = content.replace(head, f"\n\n**{head}**\n")
+                if head in content:
+                    if not subtopic:
+                        subtopic = head
+                    if f"**{head}**" not in content:
+                        content = content.replace(head, f"\n\n**{head}**\n")
 
-            formatted_sections.append(f"### 📄 {title}\n\n{content.strip()}")
+            header_text = f"### 📄 {title}"
+            if subtopic and subtopic.lower() not in title.lower():
+                header_text += f" — *{subtopic}*"
+
+            formatted_sections.append(f"{header_text}\n\n{content.strip()}")
 
         output = "\n\n---\n\n".join(formatted_sections)
         return output, sources
