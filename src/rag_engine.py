@@ -208,9 +208,14 @@ class RAGEngine:
                 "top_p": 0.9,
             },
         }
+        headers = {
+            "ngrok-skip-browser-warning": "true",
+            "Bypass-Tunnel-Reminder": "true",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        }
 
         try:
-            response = requests.post(f"{ollama_base_url}/api/chat", json=payload, timeout=180)
+            response = requests.post(f"{ollama_base_url}/api/chat", json=payload, headers=headers, timeout=180)
             response.raise_for_status()
             result = response.json()
             answer_text = result.get("message", {}).get("content", "")

@@ -38,9 +38,14 @@ def clear_caches() -> None:
 
 
 def check_ollama_status() -> bool:
-    """Check whether the local Ollama server is reachable."""
+    """Check whether the local or remote Ollama server is reachable."""
     try:
-        response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=3)
+        headers = {
+            "ngrok-skip-browser-warning": "true",
+            "Bypass-Tunnel-Reminder": "true",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        }
+        response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", headers=headers, timeout=5)
         return response.ok
     except requests.RequestException:
         return False
