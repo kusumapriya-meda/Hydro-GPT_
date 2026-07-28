@@ -157,7 +157,7 @@ class RAGEngine:
         embeddings = np.load(embeddings_path, allow_pickle=True)
         return index, chunks, metadata, embeddings
 
-    def get_retriever(self, vector_store: Tuple[faiss.Index, List[str], List[Dict[str, Any]], np.ndarray], k: int = 2, max_distance: float = 1.25) -> Any:
+    def get_retriever(self, vector_store: Tuple[faiss.Index, List[str], List[Dict[str, Any]], np.ndarray], k: int = 1, max_distance: float = 1.25) -> Any:
         """Return a retrieval function for top-k matching chunks with similarity distance filtering."""
         index, chunks, metadata, _ = vector_store
 
@@ -251,17 +251,7 @@ class RAGEngine:
         except Exception:
             pass
 
-        # 2. Standalone RAG mode: group chunks by document title and format sections cleanly
-        grouped_docs: Dict[str, List[str]] = {}
-        for item in retrieved_items:
-            title = item.get("metadata", {}).get("title", "Knowledge Base").replace("_", " ")
-            content = item.get("content", "").strip()
-            if content:
-                if title not in grouped_docs:
-                    grouped_docs[title] = []
-                if content not in grouped_docs[title]:
-                    grouped_docs[title].append(content)
-
+        # 2. Standalone RAG mode: format single top matching document section cleanly
         formatted_sections = []
         known_headings = [
             "Why Water Quality Matters", "Sources of Pollution", "Treatment and Protection",
@@ -271,15 +261,19 @@ class RAGEngine:
             "Understanding Drought", "Preparedness and Response", "Building Long-Term Resilience"
         ]
 
-        for title, chunks in grouped_docs.items():
-            combined_text = "\n\n".join(chunks)
-            for head in known_headings:
-                if head in combined_text and f"**{head}**" not in combined_text:
-                    combined_text = combined_text.replace(head, f"\n\n**{head}**\n")
+        seen_titles = set()
+        for item in retrieved_items:
+            title = item.get("metadata", {}).get("title", "Knowledge Base").replace("_", " ")
+            content = item.get("content", "").strip()
+            if not content or title in seen_titles:
+                continue
+            seen_titles.add(title)
 
-            # Clean leading newlines
-            clean_body = combined_text.strip()
-            formatted_sections.append(f"### 📄 {title}\n\n{clean_body}")
+            for head in known_headings:
+                if head in content and f"**{head}**" not in content:
+                    content = content.replace(head, f"\n\n**{head}**\n")
+
+            formatted_sections.append(f"### 📄 {title}\n\n{content.strip()}")
 
         output = "\n\n---\n\n".join(formatted_sections)
         return output, sources

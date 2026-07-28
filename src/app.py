@@ -91,7 +91,7 @@ def ensure_vector_store() -> None:
         if "vector_store" not in st.session_state or st.session_state.vector_store is None:
             try:
                 st.session_state.vector_store = get_engine().load_vector_store(VECTOR_STORE_PATH)
-                st.session_state.retriever = get_engine().get_retriever(st.session_state.vector_store, k=2)
+                st.session_state.retriever = get_engine().get_retriever(st.session_state.vector_store, k=1)
             except Exception:
                 st.session_state.vector_store = None
         return
@@ -102,7 +102,7 @@ def ensure_vector_store() -> None:
             with st.spinner("Initializing knowledge base vector store..."):
                 get_engine().create_vector_store(documents, persist_path=VECTOR_STORE_PATH)
                 st.session_state.vector_store = get_engine().load_vector_store(VECTOR_STORE_PATH)
-                st.session_state.retriever = get_engine().get_retriever(st.session_state.vector_store, k=2)
+                st.session_state.retriever = get_engine().get_retriever(st.session_state.vector_store, k=1)
     except Exception as exc:
         print(f"Initial indexing failed: {exc}")
 
@@ -123,7 +123,7 @@ def ingest_documents() -> Tuple[str, int, int]:
             status.update(label="Completed Successfully", state="complete", expanded=False)
         clear_caches()
         st.session_state.vector_store = get_engine().load_vector_store(VECTOR_STORE_PATH)
-        st.session_state.retriever = get_engine().get_retriever(st.session_state.vector_store, k=2)
+        st.session_state.retriever = get_engine().get_retriever(st.session_state.vector_store, k=1)
         return "Completed Successfully", stats["num_documents"], stats["num_chunks"]
     except Exception as exc:
         return f"Indexing failed: {exc}", 0, 0
@@ -271,7 +271,7 @@ def main() -> None:
                 st.session_state.vector_store = vector_store
             retriever = st.session_state.get("retriever")
             if retriever is None:
-                retriever = get_engine().get_retriever(vector_store, k=2)
+                retriever = get_engine().get_retriever(vector_store, k=1)
                 st.session_state.retriever = retriever
 
             start_time = time.perf_counter()
