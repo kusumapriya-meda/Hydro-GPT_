@@ -239,24 +239,24 @@ def main() -> None:
 
     render_chat_history()
 
+    # Always render the chat input so the searchbar is continuously visible at the bottom
+    user_input = st.chat_input("Ask a water-related question")
+
+    prompt = None
     if st.session_state.pending_prompt:
         prompt = st.session_state.pending_prompt
         st.session_state.pending_prompt = ""
-    else:
-        prompt = st.chat_input("Ask a water-related question")
+    elif user_input:
+        prompt = user_input
 
     if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
 
         pdf_count, _, vector_loaded = get_knowledge_base_summary()
         if not pdf_count:
-            fallback = "No documents found."
-            with st.chat_message("assistant"):
-                st.markdown(fallback)
+            fallback = "No documents found in the Knowledge Base."
             st.session_state.messages.append({"role": "assistant", "content": fallback, "sources": [], "response_time": 0.0})
-            return
+            st.rerun()
 
         if not check_ollama_status():
             start_time = time.perf_counter()
@@ -294,19 +294,13 @@ def main() -> None:
                 answer = f"Ollama is not running. (Retrieval notice: {exc})"
 
             response_time = time.perf_counter() - start_time
-            with st.chat_message("assistant"):
-                st.markdown(answer)
-                if sources:
-                    st.markdown(f"<span style='color: #20C997; font-size: 0.85rem;'>from {len(sources)} document{'s' if len(sources) != 1 else ''}</span>", unsafe_allow_html=True)
-                st.caption(f"Retrieval Time: {response_time:.2f} seconds")
-
             st.session_state.messages.append({
                 "role": "assistant",
                 "content": answer,
                 "sources": sources,
                 "response_time": response_time,
             })
-            return
+            st.rerun()
 
         try:
             vector_store = st.session_state.get("vector_store")
@@ -328,29 +322,21 @@ def main() -> None:
             response_time = time.perf_counter() - start_time
             deduped_sources = list(dict.fromkeys(sources))
 
-            with st.chat_message("assistant"):
-                st.markdown(answer)
-                if deduped_sources:
-                    source_count = len(deduped_sources)
-                    st.markdown(f"<span style='color: #20C997; font-size: 0.85rem;'>from {source_count} document{'s' if source_count != 1 else ''}</span>", unsafe_allow_html=True)
-                st.caption(f"Response Time: {response_time:.2f} seconds")
-
             st.session_state.messages.append({
                 "role": "assistant",
                 "content": answer,
                 "sources": deduped_sources,
                 "response_time": response_time,
             })
+            st.rerun()
         except FileNotFoundError:
             fallback = "Knowledge Base not indexed."
-            with st.chat_message("assistant"):
-                st.markdown(fallback)
             st.session_state.messages.append({"role": "assistant", "content": fallback, "sources": [], "response_time": 0.0})
+            st.rerun()
         except Exception as exc:
             fallback = f"An error occurred: {exc}"
-            with st.chat_message("assistant"):
-                st.markdown(fallback)
             st.session_state.messages.append({"role": "assistant", "content": fallback, "sources": [], "response_time": 0.0})
+            st.rerun()
 
 
 if __name__ == "__main__":
