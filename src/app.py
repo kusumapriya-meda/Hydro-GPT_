@@ -191,18 +191,18 @@ def render_sidebar() -> None:
             "Drought management",
             "Rainwater harvesting",
         ]
-        for question in example_questions:
-            if st.button(question, use_container_width=True, key=f"q_{question}"):
+        for idx, question in enumerate(example_questions):
+            if st.button(question, use_container_width=True, key=f"btn_ex_{idx}"):
                 st.session_state.pending_prompt = question
                 st.rerun()
 
         st.markdown("---")
-        if st.button("Rebuild knowledge base", use_container_width=True):
+        if st.button("Rebuild knowledge base", use_container_width=True, key="btn_rebuild_kb"):
             status_text, num_docs, num_chunks = ingest_documents()
             st.success(status_text)
             if num_docs or num_chunks:
                 st.info(f"Documents: {num_docs} | Chunks: {num_chunks}")
-        if st.button("Clear chat", use_container_width=True):
+        if st.button("Clear chat", use_container_width=True, key="btn_clear_chat"):
             st.session_state.messages = []
             st.session_state.pop("pending_prompt", None)
             st.rerun()
