@@ -252,17 +252,53 @@ def main() -> None:
             return
 
         if not check_ollama_status():
-            fallback = "Ollama is not running. Please start Ollama to continue."
-            with st.chat_message("assistant"):
-                st.markdown(fallback)
-            st.session_state.messages.append({"role": "assistant", "content": fallback, "sources": [], "response_time": 0.0})
-            return
+            start_time = time.perf_counter()
+            sources = []
+            try:
+                vector_store = st.session_state.get("vector_store")
+                if vector_store is None:
+                    vector_store = get_engine().load_vector_store(VECTOR_STORE_PATH)
+                    st.session_state.vector_store = vector_store
+                retriever = st.session_state.get("retriever")
+                if retriever is None:
+                    retriever = get_engine().get_retriever(vector_store, k=2)
+                    st.session_state.retriever = retriever
 
-        if not vector_loaded:
-            fallback = "Knowledge Base not indexed."
+                retrieved_items = retriever(prompt)
+                context_chunks = [item.get("content", "") for item in retrieved_items if item.get("content")]
+                sources = list(dict.fromkeys([item.get("metadata", {}).get("title", "") for item in retrieved_items if item.get("metadata", {}).get("title")]))
+                sources = [s for s in sources if s]
+
+                if context_chunks:
+                    passages = []
+                    for item in retrieved_items:
+                        t = item.get("metadata", {}).get("title", "Knowledge Base")
+                        c = item.get("content", "")
+                        passages.append(f"**From `{t}`:**\n\n{c}")
+                    passages_text = "\n\n---\n\n".join(passages)
+                    answer = (
+                        "ℹ️ **Ollama LLM is offline** (Local server at `http://localhost:11434` is not running on this cloud instance).\n\n"
+                        f"**Direct Knowledge Base Retrieval Results:**\n\n{passages_text}\n\n"
+                        f"*To enable LLM answer synthesis, run Ollama locally (`ollama run {OLLAMA_MODEL_NAME}`) or set a public `OLLAMA_BASE_URL`.*"
+                    )
+                else:
+                    answer = "Ollama is not running, and no relevant passages were found in the knowledge base."
+            except Exception as exc:
+                answer = f"Ollama is not running. (Retrieval notice: {exc})"
+
+            response_time = time.perf_counter() - start_time
             with st.chat_message("assistant"):
-                st.markdown(fallback)
-            st.session_state.messages.append({"role": "assistant", "content": fallback, "sources": [], "response_time": 0.0})
+                st.markdown(answer)
+                if sources:
+                    st.markdown(f"<span style='color: #20C997; font-size: 0.85rem;'>from {len(sources)} document{'s' if len(sources) != 1 else ''}</span>", unsafe_allow_html=True)
+                st.caption(f"Retrieval Time: {response_time:.2f} seconds")
+
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": answer,
+                "sources": sources,
+                "response_time": response_time,
+            })
             return
 
         try:
