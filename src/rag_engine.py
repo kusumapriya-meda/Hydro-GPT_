@@ -10,7 +10,13 @@ import requests
 from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
 
-from src.config import EMBEDDING_MODEL_NAME, KNOWLEDGE_BASE_PATH, OLLAMA_BASE_URL, OLLAMA_MODEL_NAME, VECTOR_STORE_PATH
+from src.config import (
+    EMBEDDING_MODEL_NAME,
+    KNOWLEDGE_BASE_PATH,
+    OLLAMA_BASE_URL,
+    OLLAMA_MODEL_NAME,
+    VECTOR_STORE_PATH,
+)
 from src.prompts import build_prompt
 
 
@@ -29,7 +35,7 @@ class RAGEngine:
         self.embedding_model_name = embedding_model_name
         self.embedding_model = SentenceTransformer(embedding_model_name)
 
-    def _split_text(self, text: str, chunk_size: int = 400, chunk_overlap: int = 80) -> List[str]:
+    def _split_text(self, text: str, chunk_size: int = 180, chunk_overlap: int = 35) -> List[str]:
         """Split text into smaller chunks tuned for small language models and limited RAM."""
         if not text.strip():
             return []
@@ -85,8 +91,9 @@ class RAGEngine:
         if not documents:
             raise ValueError("No documents available for indexing.")
 
-        embedding_model_name = embedding_model_name or self.embedding_model_name
-        self.embedding_model = SentenceTransformer(embedding_model_name)
+        if embedding_model_name and embedding_model_name != self.embedding_model_name:
+            self.embedding_model_name = embedding_model_name
+            self.embedding_model = SentenceTransformer(embedding_model_name)
 
         chunks: List[str] = []
         metadata: List[Dict[str, Any]] = []
@@ -137,7 +144,7 @@ class RAGEngine:
         embeddings = np.load(embeddings_path, allow_pickle=True)
         return index, chunks, metadata, embeddings
 
-    def get_retriever(self, vector_store: Tuple[faiss.Index, List[str], List[Dict[str, Any]], np.ndarray], k: int = 4) -> Any:
+    def get_retriever(self, vector_store: Tuple[faiss.Index, List[str], List[Dict[str, Any]], np.ndarray], k: int = 2) -> Any:
         """Return a retrieval function for top-k matching chunks."""
         index, chunks, metadata, _ = vector_store
 
@@ -171,18 +178,21 @@ class RAGEngine:
                 sources.append(title)
 
         if not context_chunks:
-            return (
-                "The available documents do not have enough information on this.",
-                [],
-            )
+            return ("The available documents do not have enough information on this.", [])
 
-        context_text = "\n\n".join(context_chunks)
-        prompt = build_prompt(context_text, query)
+        prompt = build_prompt("\n\n".join(context_chunks), query)
 
         payload = {
             "model": ollama_model,
             "messages": [{"role": "user", "content": prompt}],
             "stream": False,
+            "options": {
+                "temperature": 0.2,
+                "num_predict": 120,
+                "num_ctx": 1024,
+                "top_k": 20,
+                "top_p": 0.9,
+            },
         }
 
         try:
