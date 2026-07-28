@@ -12,7 +12,7 @@ for p in (str(ROOT), str(SRC)):
 
 try:
     from src.app import main
-except ImportError:
+except (ImportError, KeyError):
     from app import main
 
 # Automatically invoke main when Streamlit executes this module
