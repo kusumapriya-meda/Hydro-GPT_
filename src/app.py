@@ -248,11 +248,12 @@ def main() -> None:
     user_input = st.chat_input("Ask a water-related question")
 
     prompt = None
-    if st.session_state.pending_prompt:
-        prompt = st.session_state.pending_prompt
-        st.session_state.pending_prompt = ""
-    elif user_input:
+    if user_input:
         prompt = user_input
+        st.session_state["pending_prompt"] = ""
+    elif st.session_state.get("pending_prompt"):
+        prompt = st.session_state.pending_prompt
+        st.session_state["pending_prompt"] = ""
 
     if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
