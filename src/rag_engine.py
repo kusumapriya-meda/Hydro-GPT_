@@ -243,12 +243,35 @@ class RAGEngine:
         except Exception:
             pass
 
-        # 2. Standalone RAG mode: format retrieved knowledge passages directly without crashing
-        formatted_sections = []
+        # 2. Standalone RAG mode: group chunks by document title and format sections cleanly
+        grouped_docs: Dict[str, List[str]] = {}
         for item in retrieved_items:
-            t = item.get("metadata", {}).get("title", "Knowledge Base").replace("_", " ")
-            c = item.get("content", "").strip()
-            formatted_sections.append(f"#### 📄 {t}\n{c}")
+            title = item.get("metadata", {}).get("title", "Knowledge Base").replace("_", " ")
+            content = item.get("content", "").strip()
+            if content:
+                if title not in grouped_docs:
+                    grouped_docs[title] = []
+                if content not in grouped_docs[title]:
+                    grouped_docs[title].append(content)
 
-        output = "\n\n".join(formatted_sections)
+        formatted_sections = []
+        known_headings = [
+            "Why Water Quality Matters", "Sources of Pollution", "Treatment and Protection",
+            "Introduction", "Integrated Management", "Climate and Resilience",
+            "Groundwater as a Strategic Resource", "Recharge and Conservation", "Quality and Risk",
+            "Flood Risk and Exposure", "Designing Resilient Systems", "Integrated Flood Management",
+            "Understanding Drought", "Preparedness and Response", "Building Long-Term Resilience"
+        ]
+
+        for title, chunks in grouped_docs.items():
+            combined_text = "\n\n".join(chunks)
+            for head in known_headings:
+                if head in combined_text and f"**{head}**" not in combined_text:
+                    combined_text = combined_text.replace(head, f"\n\n**{head}**\n")
+
+            # Clean leading newlines
+            clean_body = combined_text.strip()
+            formatted_sections.append(f"### 📄 {title}\n\n{clean_body}")
+
+        output = "\n\n---\n\n".join(formatted_sections)
         return output, sources
