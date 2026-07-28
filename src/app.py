@@ -48,15 +48,23 @@ def check_ollama_status() -> bool:
 
 def get_knowledge_base_summary() -> Tuple[int, int, bool]:
     """Return document count, chunk count, and vector-store availability."""
-    documents = load_documents_cached(KNOWLEDGE_BASE_PATH)
-    pdf_count = len(documents)
+    pdf_count = 0
     chunk_count = 0
     vector_loaded = False
+    try:
+        documents = load_documents_cached(KNOWLEDGE_BASE_PATH)
+        pdf_count = len(documents)
+    except Exception:
+        pdf_count = 0
 
     if "vector_store" in st.session_state and st.session_state.vector_store is not None:
-        _, chunks, _, _ = st.session_state.vector_store
-        chunk_count = len(chunks)
-        vector_loaded = True
+        try:
+            _, chunks, _, _ = st.session_state.vector_store
+            chunk_count = len(chunks)
+            vector_loaded = True
+        except Exception:
+            chunk_count = 0
+            vector_loaded = False
     else:
         store_path = Path(VECTOR_STORE_PATH)
         if (store_path / "index.faiss").exists():
@@ -86,20 +94,20 @@ def ensure_vector_store() -> None:
     try:
         documents = load_documents_cached(KNOWLEDGE_BASE_PATH)
         if documents:
-            get_engine().create_vector_store(documents, persist_path=VECTOR_STORE_PATH)
-            st.session_state.vector_store = get_engine().load_vector_store(VECTOR_STORE_PATH)
-            st.session_state.retriever = get_engine().get_retriever(st.session_state.vector_store, k=2)
+            with st.spinner("Initializing knowledge base vector store..."):
+                get_engine().create_vector_store(documents, persist_path=VECTOR_STORE_PATH)
+                st.session_state.vector_store = get_engine().load_vector_store(VECTOR_STORE_PATH)
+                st.session_state.retriever = get_engine().get_retriever(st.session_state.vector_store, k=2)
     except Exception as exc:
         print(f"Initial indexing failed: {exc}")
 
 
 def ingest_documents() -> Tuple[str, int, int]:
     """Rebuild the FAISS index from the knowledge base."""
-    documents = load_documents_cached(KNOWLEDGE_BASE_PATH)
-    if not documents:
-        return "No documents found.", 0, 0
-
     try:
+        documents = load_documents_cached(KNOWLEDGE_BASE_PATH)
+        if not documents:
+            return "No documents found.", 0, 0
         with st.status("Indexing Started...", expanded=True) as status:
             status.write("Loading documents...")
             status.write("Generating embeddings...")
@@ -186,7 +194,6 @@ def render_sidebar() -> None:
             st.session_state.messages = []
             st.session_state.pop("pending_prompt", None)
             st.rerun()
-            st.write("• Ollama")
 
 
 def render_chat_history() -> None:
