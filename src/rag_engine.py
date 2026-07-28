@@ -173,6 +173,34 @@ class RAGEngine:
 
         return retrieve
 
+    def try_cloud_llm(self, prompt: str) -> Optional[str]:
+        """Optional fallback to Groq API if GROQ_API_KEY is present in env or secrets."""
+        import os
+        groq_key = os.getenv("GROQ_API_KEY")
+        if not groq_key:
+            try:
+                import streamlit as st
+                if hasattr(st, "secrets") and "GROQ_API_KEY" in st.secrets:
+                    groq_key = str(st.secrets["GROQ_API_KEY"])
+            except Exception:
+                pass
+        if groq_key:
+            try:
+                headers = {"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"}
+                payload = {
+                    "model": "llama-3.1-8b-instant",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.2,
+                    "max_tokens": 300,
+                }
+                res = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload, timeout=10)
+                if res.ok:
+                    data = res.json()
+                    return data["choices"][0]["message"]["content"].strip()
+            except Exception:
+                pass
+        return None
+
     def generate_answer(
         self,
         query: str,
@@ -181,7 +209,7 @@ class RAGEngine:
         ollama_model: str = OLLAMA_MODEL_NAME,
         system_prompt: str = "",
     ) -> Tuple[str, List[str]]:
-        """Generate an answer using retrieved context and a compact prompt for Ollama."""
+        """Generate an answer using retrieved context and a compact prompt for Ollama or Cloud API."""
         retrieved_items = retriever(query)
         context_chunks = [item.get("content", "") for item in retrieved_items if item.get("content")]
         sources = []
@@ -195,6 +223,7 @@ class RAGEngine:
 
         prompt = build_prompt("\n\n".join(context_chunks), query)
 
+        # 1. Try local or remote Ollama server
         payload = {
             "model": ollama_model,
             "messages": [{"role": "user", "content": prompt}],
@@ -214,5 +243,13 @@ class RAGEngine:
             result = response.json()
             answer_text = result.get("message", {}).get("content", "")
             return answer_text.strip(), sources
-        except requests.RequestException as exc:
-            return f"Ollama request failed: {exc}", sources
+        except requests.RequestException:
+            # 2. Try optional Cloud LLM fallback
+            cloud_ans = self.try_cloud_llm(prompt)
+            if cloud_ans:
+                return cloud_ans, sources
+
+            # 3. Clean fallback showing formatted retrieved chunks
+            formatted_chunks = [f"**From `{s}`:**\n{c}" for s, c in zip(sources, context_chunks)]
+            fallback_text = "\n\n---\n\n".join(formatted_chunks)
+            return f"### 💧 Knowledge Base Results\n\n{fallback_text}", sources
