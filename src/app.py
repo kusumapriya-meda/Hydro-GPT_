@@ -1,14 +1,21 @@
-from __future__ import annotations
-
+import sys
 import time
 from pathlib import Path
 from typing import Any, List, Optional, Tuple
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 import requests
 import streamlit as st
 
-from config import KNOWLEDGE_BASE_PATH, OLLAMA_BASE_URL, OLLAMA_MODEL_NAME, VECTOR_STORE_PATH
-from rag_engine import RAGEngine
+try:
+    from src.config import KNOWLEDGE_BASE_PATH, OLLAMA_BASE_URL, OLLAMA_MODEL_NAME, VECTOR_STORE_PATH
+    from src.rag_engine import RAGEngine
+except ImportError:
+    from config import KNOWLEDGE_BASE_PATH, OLLAMA_BASE_URL, OLLAMA_MODEL_NAME, VECTOR_STORE_PATH
+    from rag_engine import RAGEngine
 
 
 @st.cache_resource(show_spinner=False)

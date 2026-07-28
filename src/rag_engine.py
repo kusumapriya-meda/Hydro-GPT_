@@ -1,8 +1,11 @@
-from __future__ import annotations
-
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 import faiss
 import numpy as np
@@ -10,14 +13,24 @@ import requests
 from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
 
-from src.config import (
-    EMBEDDING_MODEL_NAME,
-    KNOWLEDGE_BASE_PATH,
-    OLLAMA_BASE_URL,
-    OLLAMA_MODEL_NAME,
-    VECTOR_STORE_PATH,
-)
-from src.prompts import build_prompt
+try:
+    from src.config import (
+        EMBEDDING_MODEL_NAME,
+        KNOWLEDGE_BASE_PATH,
+        OLLAMA_BASE_URL,
+        OLLAMA_MODEL_NAME,
+        VECTOR_STORE_PATH,
+    )
+    from src.prompts import build_prompt
+except ImportError:
+    from config import (
+        EMBEDDING_MODEL_NAME,
+        KNOWLEDGE_BASE_PATH,
+        OLLAMA_BASE_URL,
+        OLLAMA_MODEL_NAME,
+        VECTOR_STORE_PATH,
+    )
+    from prompts import build_prompt
 
 
 @dataclass
