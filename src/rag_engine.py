@@ -182,6 +182,24 @@ class RAGEngine:
         system_prompt: str = "",
     ) -> Tuple[str, List[str]]:
         """Generate an answer using local Ollama or present structured RAG knowledge base results."""
+        clean_query = query.strip().lower().strip("!.,?")
+        greetings = {
+            "hi", "hello", "hey", "greetings", "good morning", "good afternoon",
+            "good evening", "hi there", "hello there", "help", "who are you",
+            "what can you do", "thanks", "thank you"
+        }
+        if clean_query in greetings:
+            welcome_msg = (
+                "Hello! 💧 Welcome to **Hydro GPT**.\n\n"
+                "I am your water resources assistant. You can ask me questions about:\n"
+                "- 🌊 **Water Resources & Sustainability**\n"
+                "- 🚰 **Water Quality Standards & Pollution**\n"
+                "- 🌧️ **Flood Control & Prevention**\n"
+                "- 🏜️ **Drought Management & Preparedness**\n"
+                "- 💧 **Groundwater Protection & Recharge**\n\n"
+                "Try typing a water-related question below or selecting an example topic from the sidebar!"
+            )
+            return welcome_msg, []
         retrieved_items = retriever(query)
         context_chunks = [item.get("content", "") for item in retrieved_items if item.get("content")]
         sources = []
