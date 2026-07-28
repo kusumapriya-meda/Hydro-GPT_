@@ -157,18 +157,21 @@ class RAGEngine:
         embeddings = np.load(embeddings_path, allow_pickle=True)
         return index, chunks, metadata, embeddings
 
-    def get_retriever(self, vector_store: Tuple[faiss.Index, List[str], List[Dict[str, Any]], np.ndarray], k: int = 2) -> Any:
-        """Return a retrieval function for top-k matching chunks."""
+    def get_retriever(self, vector_store: Tuple[faiss.Index, List[str], List[Dict[str, Any]], np.ndarray], k: int = 2, max_distance: float = 1.25) -> Any:
+        """Return a retrieval function for top-k matching chunks with similarity distance filtering."""
         index, chunks, metadata, _ = vector_store
 
         def retrieve(query: str) -> List[Dict[str, Any]]:
             query_embedding = self.embedding_model.encode([query], show_progress_bar=False).astype("float32")
-            _, indices = index.search(query_embedding, min(k, len(chunks)))
+            distances, indices = index.search(query_embedding, min(k, len(chunks)))
             results: List[Dict[str, Any]] = []
-            for idx in indices[0]:
+            for dist, idx in zip(distances[0], indices[0]):
                 if idx < 0:
                     continue
-                results.append({"content": chunks[int(idx)], "metadata": metadata[int(idx)]})
+                # Skip matches where vector distance exceeds threshold (unrelated query)
+                if float(dist) > max_distance:
+                    continue
+                results.append({"content": chunks[int(idx)], "metadata": metadata[int(idx)], "distance": float(dist)})
             return results
 
         return retrieve
@@ -200,6 +203,7 @@ class RAGEngine:
                 "Try typing a water-related question below (e.g., *'What are water quality standards?'*) or select an example topic from the sidebar!"
             )
             return welcome_msg, []
+
         retrieved_items = retriever(query)
         context_chunks = [item.get("content", "") for item in retrieved_items if item.get("content")]
         sources = []
@@ -209,7 +213,11 @@ class RAGEngine:
                 sources.append(title)
 
         if not context_chunks:
-            return ("The available documents do not have enough information on this.", [])
+            return (
+                "I couldn't find relevant information in the Hydro GPT knowledge base for your query. "
+                "Please try asking a water-related question (e.g., about water quality standards, flood control, drought management, groundwater, or water resources).",
+                []
+            )
 
         prompt = build_prompt("\n\n".join(context_chunks), query)
 
