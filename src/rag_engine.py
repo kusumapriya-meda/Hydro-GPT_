@@ -215,18 +215,22 @@ class RAGEngine:
         }
 
         try:
-            response = requests.post(f"{ollama_base_url}/api/chat", json=payload, headers=headers, timeout=180)
+            base_url = ollama_base_url.rstrip("/")
+            response = requests.post(f"{base_url}/api/chat", json=payload, headers=headers, timeout=180)
             response.raise_for_status()
             result = response.json()
             answer_text = result.get("message", {}).get("content", "")
-            return answer_text.strip(), sources
-        except requests.RequestException:
-            # 2. Standalone RAG mode: format retrieved knowledge passages directly without API keys
-            formatted_sections = []
-            for item in retrieved_items:
-                t = item.get("metadata", {}).get("title", "Knowledge Base").replace("_", " ")
-                c = item.get("content", "").strip()
-                formatted_sections.append(f"#### 📄 {t}\n{c}")
+            if answer_text and answer_text.strip():
+                return answer_text.strip(), sources
+        except Exception:
+            pass
 
-            output = "\n\n".join(formatted_sections)
-            return output, sources
+        # 2. Standalone RAG mode: format retrieved knowledge passages directly without crashing
+        formatted_sections = []
+        for item in retrieved_items:
+            t = item.get("metadata", {}).get("title", "Knowledge Base").replace("_", " ")
+            c = item.get("content", "").strip()
+            formatted_sections.append(f"#### 📄 {t}\n{c}")
+
+        output = "\n\n".join(formatted_sections)
+        return output, sources
